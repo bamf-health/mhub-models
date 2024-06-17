@@ -1,0 +1,40 @@
+FROM mhubai/base:latest
+
+# FIXME: set this environment variable as a shortcut to avoid nnunet crashing the build
+# by pulling sklearn instead of scikit-learn
+# N.B. this is a known issue:
+# https://github.com/MIC-DKFZ/nnUNet/issues/1281 
+# https://github.com/MIC-DKFZ/nnUNet/pull/1209
+ENV SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True
+RUN apt update
+RUN apt install -y software-properties-common
+RUN add-apt-repository -y ppa:deadsnakes/ppa
+RUN apt update
+#RUN apt remove -y python3.8
+# Install python3.9 dependency for nnunetv2
+RUN apt install -y python3.9-dev
+RUN apt install -y python3.9
+RUN apt install -y python3.9-distutils
+# Install nnunet and platipy
+RUN python3.9 -m pip install nnunetv2==2.4
+RUN python3.9 -m pip install numpy==1.26
+# Clone the main branch of MHubAI/models
+# Copy scripts and config
+COPY models/bamf_nnunet_ct_liver_v2  /app/models/bamf_nnunet_ct_liver_v2
+ENV MODEL_NAME=bamf_nnunet_ct_liver_v2
+
+# Pull nnUNet model weights into the container for Dataset009_Breast
+ENV WEIGHTS_DIR=/root/.nnunet/nnUNet_models/
+RUN mkdir -p $WEIGHTS_DIR
+ENV WEIGHTS_FN=Dataset006_Liver.zip
+ENV WEIGHTS_URL=https://zenodo.org/records/11582728/files/$WEIGHTS_FN
+RUN wget --directory-prefix ${WEIGHTS_DIR} ${WEIGHTS_URL}
+RUN unzip ${WEIGHTS_DIR}${WEIGHTS_FN} -d ${WEIGHTS_DIR}
+RUN rm ${WEIGHTS_DIR}${WEIGHTS_FN}
+
+# specify nnunet specific environment variables
+ENV WEIGHTS_FOLDER=$WEIGHTS_DIR
+
+# Default run script
+ENTRYPOINT ["mhub.run"]
+CMD ["--config", "/app/models/bamf_nnunet_ct_liver_v2/config/default.yml"]

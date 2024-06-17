@@ -1,0 +1,24 @@
+general:
+  data_base_dir: /app/data
+  version: 1.0
+  description: default configuration for Bamf NNUnet CT Liver and tumor segmentation (dicom to dicom)
+
+execute:
+- DicomImporter
+- NiftiConverter
+- NNUnetRunnerV2
+
+modules:
+  DicomImporter:
+    source_dir: input_data
+    import_dir: sorted_data
+    sort_data: true
+    meta: 
+      mod: '%Modality'
+
+  NNUnetRunnerV2:
+    in_data: nifti:mod=ct
+    nnunet_dataset: Dataset006_Liver
+    nnunet_config: 3d_fullres
+    roi: SPLEEN,KIDNEY,GALLBLADDER,DUODENUM,PANCREAS,SMALL_INTESTINE,LUNG,LIVER,LIVER+AVID_TUMOR
+    export_prob_maps: False
