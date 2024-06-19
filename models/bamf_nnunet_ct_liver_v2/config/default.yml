@@ -7,6 +7,9 @@ execute:
 - DicomImporter
 - NiftiConverter
 - NNUnetRunnerV2
+- BamfProcessorRunner
+- DsegConverter
+- DataOrganizer
 
 modules:
   DicomImporter:
@@ -22,3 +25,12 @@ modules:
     nnunet_config: 3d_fullres
     roi: SPLEEN,KIDNEY,GALLBLADDER,DUODENUM,PANCREAS,SMALL_INTESTINE,LUNG,LIVER,LIVER+AVID_TUMOR
     export_prob_maps: False
+
+  DsegConverter:
+    source_segs: nifti:mod=seg:processor=bamf
+    model_name: Bamf NNUnet CT Liver
+    target_dicom: dicom:mod=ct
+
+  DataOrganizer:
+    targets:
+    - dicomseg-->[i:sid]/bamf_nnunet_ct_liver.seg.dcm

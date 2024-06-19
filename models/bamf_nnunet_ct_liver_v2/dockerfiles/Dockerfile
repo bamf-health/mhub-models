@@ -6,22 +6,13 @@ FROM mhubai/base:latest
 # https://github.com/MIC-DKFZ/nnUNet/issues/1281 
 # https://github.com/MIC-DKFZ/nnUNet/pull/1209
 ENV SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True
-RUN apt update
-RUN apt install -y software-properties-common
-RUN add-apt-repository -y ppa:deadsnakes/ppa
-RUN apt update
-#RUN apt remove -y python3.8
-# Install python3.9 dependency for nnunetv2
-RUN apt install -y python3.9-dev
-RUN apt install -y python3.9
-RUN apt install -y python3.9-distutils
+
 # Install nnunet and platipy
-RUN python3.9 -m pip install nnunetv2==2.4
-RUN python3.9 -m pip install numpy==1.26
+RUN pip3 install --no-cache-dir nnunetv2==2.0
+
 # Clone the main branch of MHubAI/models
-# Copy scripts and config
-COPY models/bamf_nnunet_ct_liver_v2  /app/models/bamf_nnunet_ct_liver_v2
-ENV MODEL_NAME=bamf_nnunet_ct_liver_v2
+ARG MHUB_MODELS_REPO
+RUN buildutils/import_mhub_model.sh bamf_nnunet_ct_liver ${MHUB_MODELS_REPO}
 
 # Pull nnUNet model weights into the container for Dataset009_Breast
 ENV WEIGHTS_DIR=/root/.nnunet/nnUNet_models/
