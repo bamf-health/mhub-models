@@ -7,7 +7,7 @@ execute:
 - DicomImporter
 - NiftiConverter
 - NNUnetRunnerV2
-- BamfProcessorRunner
+- PostProcessorRunner
 - DsegConverter
 - DataOrganizer
 
